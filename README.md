@@ -11,5 +11,14 @@ Requires Python 3.6+
 4. Install [ffmpeg](https://ffmpeg.org). You can use a package manager to do that.
 5. Run `python moo.py`
 6. If this is the first run, a browser will open to grant Music Moo access to your Google Drive
-7. Make a POST request to `localhost:5000/` with a JSON in the body of format `{"url": <youtube_url>}`
+7. Make a POST request to `localhost:5000/` with a JSON in the body of format:
+```
+{
+	"urls": [
+            "<youtube_link1>",
+            "<youtube_link2>",
+            ...
+	]
+}
+```
 8. Download a cloud music player to connect to your Google Drive and play music on your devices

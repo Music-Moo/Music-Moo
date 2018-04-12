@@ -101,8 +101,9 @@ for thread in threads:
 
 @app.route('/', methods=['POST'])
 def index():
-    url = request.json.get('url')
-    download_queue.put(url)
+    urls = request.json.get('urls')
+    for url in urls:
+        download_queue.put(url)
     return 'Download request processed!', 200
 
 if __name__ == "__main__":
