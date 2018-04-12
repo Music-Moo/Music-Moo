@@ -1,9 +1,27 @@
 
-from pytube import YouTube
-from googleapiclient.http import MediaFileUpload
-from oauth2client import file, client, tools
-from httplib2 import Http
 from apiclient.discovery import build
+from flask import Flask, request
+from googleapiclient.http import MediaFileUpload
+from httplib2 import Http
+from pytube import YouTube
+from oauth2client import file, client, tools
+
+app = Flask(__name__)
+
+
+@app.route('/', methods=['POST'])
+def index():
+    url = request.json.get('url')
+    service = connect_to_drive()
+    file_name = download(url)
+    upload_to_drive(service, file_name)
+    return 'Download and upload complete!', 200
+
+
+@app.route('/access')
+def access():
+    connect_to_drive()
+    return 'Access granted!', 200
 
 
 def download(url):
@@ -38,6 +56,5 @@ def upload_to_drive(drive_service, file_name):
     file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
     print(f"Upload complete, id is {file.get('id')}")
 
-service = connect_to_drive()
-file_name = download('https://www.youtube.com/watch?v=DhHGDOgjie4')
-upload_to_drive(service, file_name)
+if __name__ == "__main__":
+    app.run(host='0.0.0.0')
