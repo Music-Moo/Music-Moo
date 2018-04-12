@@ -57,12 +57,24 @@ def convert_to_mp3(file_name):
 
 
 def upload_to_drive(file_name):
-    response = drive_service.files().list(q="name='Music' and mimeType='application/vnd.google-apps.folder'").execute()
-    folder_id = response.get('files', [])[0]['id']
+    response = drive_service.files().list(q="name='Music' and mimeType='application/vnd.google-apps.folder' and trashed=false").execute()
+
+    try:
+        folder_id = response.get('files', [])[0]['id']
+    except IndexError:
+        print('Music folder is missing. Creating it.')
+        folder_metadata = {
+            'name': 'Music',
+            'mimeType': 'application/vnd.google-apps.folder'
+        }
+        folder = drive_service.files().create(body=folder_metadata, fields='id').execute()
+        folder_id = folder.get('id')
+
     file_metadata = {
         'name': file_name,
         'parents': [folder_id]
     }
+    
     print(f"Upload for {file_name} has started")
     start_time = time()
     media = MediaFileUpload(file_name, mimetype='audio/mpeg')
