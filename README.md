@@ -1,6 +1,8 @@
 # Music-Moo
 Gets rid of Spotify by downloading music from Youtube and putting it on Google Drive
 
+> Did you know? [Cows do love music](https://www.youtube.com/watch?v=lXKDu6cdXLI)!
+
 Requires Python 3.6+
 
 1. `pip install -r requirements.txt`
