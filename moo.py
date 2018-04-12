@@ -48,7 +48,7 @@ def convert_to_mp3(file_name):
     )
     print(f"Conversion for {file_name} has started")
     start_time = time()
-    ff.run(stdout=subprocess.DEVNULL)
+    ff.run(stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     end_time = time()
     print(f"Conversion for {file_name} has finished in {end_time - start_time} seconds")
 
