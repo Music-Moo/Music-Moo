@@ -99,3 +99,9 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+client_secret.json
+credentials.json
+*.mp4
+.DS_Store
+settings.json
