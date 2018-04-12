@@ -51,6 +51,8 @@ def convert_to_mp3(file_name):
     ff.run(stdout=subprocess.DEVNULL)
     end_time = time()
     print(f"Conversion for {file_name} has finished in {end_time - start_time} seconds")
+
+    delete_queue.put(file_name)
     return new_file_name
 
 
@@ -68,19 +70,30 @@ def upload_to_drive(file_name):
     end_time = time()
     print(f"Upload for {file_name} has finished in {end_time - start_time} seconds, id is {file.get('id')}")
 
-    return file.get('id')
+    return file_name
+
+
+def delete_local_file(file_name):
+    try:
+        os.remove(file_name)
+        print(f"Deletion for {file_name} has finished")
+        return file_name
+    except OSError:
+        pass
 
 drive_service = connect_to_drive()
 
 download_queue = Queue(100)
 convert_queue = Queue(100)
 upload_queue = Queue(100)
+delete_queue = Queue(200)
 done_queue = Queue()
 
 threads = [
     Worker(download_from_youtube, download_queue, convert_queue),
     Worker(convert_to_mp3, convert_queue, upload_queue),
-    Worker(upload_to_drive, upload_queue, done_queue)
+    Worker(upload_to_drive, upload_queue, delete_queue),
+    Worker(delete_local_file, delete_queue, done_queue)
 ]
 for thread in threads:
     thread.start()
