@@ -103,5 +103,7 @@ ENV/
 client_secret.json
 credentials.json
 *.mp4
+*.mp3
 .DS_Store
 settings.json
+test.py

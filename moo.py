@@ -1,7 +1,11 @@
 
+import os
 from queue import Queue
+import subprocess
+from time import time
 
 from apiclient.discovery import build
+from ffmpy import FFmpeg
 from flask import Flask, request
 from googleapiclient.http import MediaFileUpload
 from httplib2 import Http
@@ -26,12 +30,28 @@ def connect_to_drive():
 
 def download_from_youtube(url):
     yt = YouTube(url)
-    stream = yt.streams.filter(only_audio=True).first()
+    stream = yt.streams.first()
     print(f"Download for {stream.default_filename} has started")
+    start_time = time()
     stream.download()
-    print(f"Download for {stream.default_filename} is complete")
+    end_time = time()
+    print(f"Download for {stream.default_filename} has finished in {end_time - start_time} seconds")
 
     return stream.default_filename
+
+
+def convert_to_mp3(file_name):
+    new_file_name = os.path.splitext(file_name)[0] + '.mp3'
+    ff = FFmpeg(
+        inputs={file_name: None},
+        outputs={new_file_name: None}
+    )
+    print(f"Conversion for {file_name} has started")
+    start_time = time()
+    ff.run(stdout=subprocess.DEVNULL)
+    end_time = time()
+    print(f"Conversion for {file_name} has finished in {end_time - start_time} seconds")
+    return new_file_name
 
 
 def upload_to_drive(file_name):
@@ -42,20 +62,24 @@ def upload_to_drive(file_name):
         'parents': [folder_id]
     }
     print(f"Upload for {file_name} has started")
+    start_time = time()
     media = MediaFileUpload(file_name, mimetype='audio/mpeg')
     file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-    print(f"Upload for {file_name} is complete, id is {file.get('id')}")
+    end_time = time()
+    print(f"Upload for {file_name} has finished in {end_time - start_time} seconds, id is {file.get('id')}")
 
     return file.get('id')
 
 drive_service = connect_to_drive()
 
 download_queue = Queue(100)
+convert_queue = Queue(100)
 upload_queue = Queue(100)
 done_queue = Queue()
 
 threads = [
-    Worker(download_from_youtube, download_queue, upload_queue),
+    Worker(download_from_youtube, download_queue, convert_queue),
+    Worker(convert_to_mp3, convert_queue, upload_queue),
     Worker(upload_to_drive, upload_queue, done_queue)
 ]
 for thread in threads:
