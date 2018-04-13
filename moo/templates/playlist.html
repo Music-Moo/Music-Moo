@@ -3,7 +3,7 @@
 <div class="container-fluid">
     <div id="title-bottom-bump" class="row">
         <div class="col-lg-4"></div>
-        <div class="col-lg-4 text-center"><h1 class="display-1">Videos</h1></div>
+        <div class="col-lg-4 text-center"><h1 class="display-1">{{ playlist_title }}</h1></div>
         <div class="col-lg-4"></div>
     </div>
     <div class="row">
@@ -17,15 +17,6 @@
                             <th></th>
                         </tr>
                     </thead>
-
-                    {% for playlist in playlists %}
-                    <tbody>
-                        <tr>
-                            <td><a href="{{ 'http://www.youtube.com/playlist?list=' + playlist['id'] }}" target="_blank">{{ playlist['title'] }}</a></td>
-                            <td><a href="/playlist/{{ playlist['id'] }}"><button type="button" id="btn-sm" class="btn btn-dark btn-sm playlist" value="{{ 'http://www.youtube.com/playlist?list=' + playlist['id'] }}">CHECK SONGS</button></td>
-                        </tr>
-                    </tbody>
-                    {% endfor %}
                 
                     {% for video in videos %}
                     <tbody>

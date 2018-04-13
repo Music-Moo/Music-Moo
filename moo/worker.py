@@ -8,6 +8,7 @@ from time import time
 from ffmpy import FFmpeg
 from googleapiclient.http import MediaFileUpload
 from pytube import YouTube
+from pytube.exceptions import RegexMatchError
 
 from moo import drive_service, delete_queue
 
@@ -38,8 +39,12 @@ class Worker(Thread):
 
         while True:
             item = self.in_queue.get()
-            result = self.func(item)
-            self.out_queue.put(result)
+            try:
+                result = self.func(item)
+            except TypeError:
+                pass
+            else:
+                self.out_queue.put(result)
 
 
 def download_from_youtube(url):
@@ -50,15 +55,19 @@ def download_from_youtube(url):
     :return str: Filename of the file in local storage
     """
 
-    yt = YouTube(url)
-    stream = yt.streams.first()
-    print(f"Download for {stream.default_filename} has started")
-    start_time = time()
-    stream.download()
-    end_time = time()
-    print(f"Download for {stream.default_filename} has finished in {end_time - start_time} seconds")
+    try:
+        yt = YouTube(url)
+    except RegexMatchError:
+        print(f"Cannot download MP3 at {url}")
+    else:
+        stream = yt.streams.first()
+        print(f"Download for {stream.default_filename} has started")
+        start_time = time()
+        stream.download()
+        end_time = time()
+        print(f"Download for {stream.default_filename} has finished in {end_time - start_time} seconds")
 
-    return stream.default_filename
+        return stream.default_filename
 
 
 def convert_to_mp3(file_name):
@@ -70,10 +79,12 @@ def convert_to_mp3(file_name):
     """
 
     new_file_name = os.path.splitext(file_name)[0] + '.mp3'
+
     ff = FFmpeg(
         inputs={file_name: None},
         outputs={new_file_name: None}
     )
+
     print(f"Conversion for {file_name} has started")
     start_time = time()
     ff.run(stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -109,13 +120,14 @@ def upload_to_drive(file_name):
         'name': file_name,
         'parents': [folder_id]
     }
+
+    media = MediaFileUpload(file_name, mimetype='audio/mpeg')
     
     print(f"Upload for {file_name} has started")
     start_time = time()
-    media = MediaFileUpload(file_name, mimetype='audio/mpeg')
     file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
     end_time = time()
-    print(f"Upload for {file_name} has finished in {end_time - start_time} seconds, id is {file.get('id')}")
+    print(f"Upload for {file_name} has finished in {end_time - start_time} seconds")
 
     return file_name
 

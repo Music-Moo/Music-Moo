@@ -13,7 +13,7 @@ $(document).ready(function(){
 
 });
 
-$('button').click(function(){
+$('.video').click(function(){
   $.ajax({
     type: 'POST',
     contentType: 'application/json; charset=utf-8',

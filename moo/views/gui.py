@@ -2,7 +2,7 @@
 
 from flask import Blueprint, request, render_template
 
-from moo.youtube import search_youtube
+from moo.youtube import search_youtube, get_playlist_videos
 
 gui = Blueprint('gui', __name__)
 
@@ -15,5 +15,11 @@ def index():
 @gui.route('/search', methods=['POST'])
 def search():
     query = request.form['searchbar-input']
-    videos = search_youtube(query)
-    return render_template('results.html', videos=videos)
+    videos, playlists = search_youtube(query)
+    return render_template('results.html', videos=videos, playlists=playlists)
+
+
+@gui.route('/playlist/<playlist_id>')
+def playlist(playlist_id):
+    playlist_title, videos = get_playlist_videos(playlist_id)
+    return render_template('playlist.html', playlist_title=playlist_title, videos=videos)
