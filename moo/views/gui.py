@@ -22,4 +22,4 @@ def search():
 @gui.route('/playlist/<playlist_id>')
 def playlist(playlist_id):
     playlist_title, videos = get_playlist_videos(playlist_id)
-    return render_template('playlist.html', playlist_title=playlist_title, videos=videos)
+    return render_template('playlist.html', playlist_title=playlist_title, playlist_id=playlist_id, videos=videos)

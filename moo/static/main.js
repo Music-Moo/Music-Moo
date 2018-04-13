@@ -1,3 +1,4 @@
+// Search bar animations
 $(document).ready(function(){
   $('#searchbar-icon').click(function(){
     $('#searchbar-input').animate({width: 'toggle'});
@@ -10,9 +11,14 @@ $(document).ready(function(){
     $("#searchbar-cross").toggle();
     $("#searchbar-icon").toggle(500);
   });
-
 });
 
+// Pressing ENTER to search in search bar
+function submit() {
+  document.searchForm.submit();
+}
+
+// Download button on videos
 $('.video').click(function(){
   $.ajax({
     type: 'POST',
@@ -24,6 +30,11 @@ $('.video').click(function(){
   $(this).attr("disabled", true);
 });
 
-function submit() {
-  document.searchForm.submit();
-}
+// Download button to download all the playlist
+$('.videos').click(function(){
+  $.ajax({
+    type: 'GET',
+    url: '/download/' + this.value,
+  });
+  $(this).attr("disabled", true);
+});
