@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="container-fluid">
+    <div id="title-bottom-bump" class="row">
+        <div class="col-lg-4"></div>
+        <div class="col-lg-4 text-center"><h1 class="display-1">Videos</h1></div>
+        <div class="col-lg-4"></div>
+    </div>
+    <div class="row">
+        <div class="col-lg-4"></div>
+        <div class="col-lg-4 text-center">
+            <div>
+                <table id="table-borderless" class="table">
+                    <thead>
+                        <tr style="border-top: hidden;">
+                            <th>Title</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                
+                    {% for video in videos %}
+                    <tbody>
+                        <tr>
+                            <td><a href="{{ video['url'] }}" target="_blank">{{ video['title'] }}</a></td>
+                            <td><button type="button" id="btn-sm" class="btn btn-dark btn-sm" value="{{ video['url'] }}">DOWNLOAD</button></td>
+                        </tr>
+                    </tbody>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+        <div class="col-lg-4"></div>
+    </div>
+</div>
+{% endblock %}

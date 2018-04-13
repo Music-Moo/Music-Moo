@@ -1,54 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from queue import Queue
 import os
 import subprocess
 from threading import Thread
 from time import time
 
-from apiclient.discovery import build
 from ffmpy import FFmpeg
 from googleapiclient.http import MediaFileUpload
-from httplib2 import Http
 from pytube import YouTube
-from oauth2client import file, client, tools
 
-
-def connect_to_drive():
-    """
-    Creates connection to the Google Drive API and returns the service object to make requests.
-
-    :return googleapiclient.discovery.Resource:
-    """
-
-    SCOPES = 'https://www.googleapis.com/auth/drive'
-    store = file.Storage('drive_credentials.json')
-    creds = store.get()
-    if not creds or creds.invalid:
-        flow = client.flow_from_clientsecrets('client_secret.json', SCOPES)
-        creds = tools.run_flow(flow, store)
-    service = build('drive', 'v3', http=creds.authorize(Http()))
-    return service
-
-
-def connect_to_youtube():
-    """
-    Creates connection to the Youtube API and returns the service object to make requests.
-
-    :return googleapiclient.discovery.Resource:
-    """
-
-    SCOPES = 'https://www.googleapis.com/auth/youtube.force-ssl'
-    store = file.Storage('youtube_credentials.json')
-    creds = store.get()
-    if not creds or creds.invalid:
-        flow = client.flow_from_clientsecrets('client_secret.json', SCOPES)
-        creds = tools.run_flow(flow, store)
-    service = build('youtube', 'v3', http=creds.authorize(Http()))
-    return service  
-
-drive_service = connect_to_drive()
-youtube_service = connect_to_youtube()
+from moo import drive_service, delete_queue
 
 
 class Worker(Thread):
@@ -172,18 +133,3 @@ def delete_local_file(file_name):
         return file_name
     except OSError:
         pass
-
-download_queue = Queue(100)
-convert_queue = Queue(100)
-upload_queue = Queue(100)
-delete_queue = Queue(200)
-done_queue = Queue()
-
-threads = [
-    Worker(download_from_youtube, download_queue, convert_queue),
-    Worker(convert_to_mp3, convert_queue, upload_queue),
-    Worker(upload_to_drive, upload_queue, delete_queue),
-    Worker(delete_local_file, delete_queue, done_queue)
-]
-for thread in threads:
-    thread.start()

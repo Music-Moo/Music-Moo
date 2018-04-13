@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="searchbar">
+    <form name="searchForm" action="/search" method="post">
+        <input type="text" id="searchbar-input" name="searchbar-input" onUnfocus="submit()" required>
+        <i class="fa fa-search" id="searchbar-icon" aria-hidden="true"></i>
+        <i class="fa fa-times" id="searchbar-cross" aria-hidden="true"></i>
+    </form>
+</div>
+{% endblock %}
