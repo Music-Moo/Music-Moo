@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 from queue import Queue
 import os
@@ -14,6 +15,12 @@ from oauth2client import file, client, tools
 
 
 def connect_to_drive():
+    """
+    Creates connection to the Google Drive API and returns the service object to make requests.
+
+    :return googleapiclient.discovery.Resource:
+    """
+
     SCOPES = 'https://www.googleapis.com/auth/drive'
     store = file.Storage('drive_credentials.json')
     creds = store.get()
@@ -25,6 +32,12 @@ def connect_to_drive():
 
 
 def connect_to_youtube():
+    """
+    Creates connection to the Youtube API and returns the service object to make requests.
+
+    :return googleapiclient.discovery.Resource:
+    """
+
     SCOPES = 'https://www.googleapis.com/auth/youtube.force-ssl'
     store = file.Storage('youtube_credentials.json')
     creds = store.get()
@@ -39,13 +52,29 @@ youtube_service = connect_to_youtube()
 
 
 class Worker(Thread):
+    """Worker that processes items from an input queue and puts the result into an output queue."""
+
     def __init__(self, func, in_queue, out_queue):
+        """
+        Builds a worker by taking a function that does work on items from the input queue to be put in the output queue.
+
+        :param function func: Function that does work on items from the input queue
+        :param Queue in_queue: Input queue
+        :param Queue out_queue: Output queue
+        """
+        
         super().__init__()
         self.func = func
         self.in_queue = in_queue
         self.out_queue = out_queue
 
     def run(self):
+        """
+        Method that gets run when the Worker thread is started.
+
+        When there's an item in in_queue, it takes it out, passes it to func as an argument, and puts the result in out_queue.
+        """
+
         while True:
             item = self.in_queue.get()
             result = self.func(item)
@@ -53,6 +82,13 @@ class Worker(Thread):
 
 
 def download_from_youtube(url):
+    """
+    Downloads an MP4 or WebM file that is associated with the video at the URL passed.
+
+    :param str url: URL of the video to be downloaded
+    :return str: Filename of the file in local storage
+    """
+
     yt = YouTube(url)
     stream = yt.streams.first()
     print(f"Download for {stream.default_filename} has started")
@@ -65,6 +101,13 @@ def download_from_youtube(url):
 
 
 def convert_to_mp3(file_name):
+    """
+    Converts the file associated with the file_name passed into an MP3 file.
+
+    :param str file_name: Filename of the original file in local storage
+    :return str: Filename of the new file in local storage
+    """
+
     new_file_name = os.path.splitext(file_name)[0] + '.mp3'
     ff = FFmpeg(
         inputs={file_name: None},
@@ -81,6 +124,13 @@ def convert_to_mp3(file_name):
 
 
 def upload_to_drive(file_name):
+    """
+    Uploads the file associated with the file_name passed to Google Drive in the Music folder (creates it in root if it doesn't exist).
+
+    :param str file_name: Filename of the file to be uploaded
+    :return str: Original filename passed as an argument (in order for the worker to send it to the delete queue)
+    """
+
     response = drive_service.files().list(q="name='Music' and mimeType='application/vnd.google-apps.folder' and trashed=false").execute()
 
     try:
@@ -110,6 +160,12 @@ def upload_to_drive(file_name):
 
 
 def delete_local_file(file_name):
+    """
+    Deletes the file associated with the file_name passed from local storage.
+
+    :return str: Filename of the file that was just deleted
+    """
+
     try:
         os.remove(file_name)
         print(f"Deletion for {file_name} has finished")
