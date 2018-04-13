@@ -3,7 +3,7 @@ Gets rid of Spotify by downloading music from Youtube and putting it on Google D
 
 > Did you know? [Cows love music](https://www.youtube.com/watch?v=lXKDu6cdXLI)!
 
-![Home Screen](https://imgur.com/N62n54L.gif)
+![GIF Animation](https://i.imgur.com/hQqx2kU.gif)
 
 Requires Python 3.6+
 
