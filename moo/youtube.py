@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from moo import youtube_service
+from moo import m2s
 
 
 def search_youtube(query):
@@ -11,7 +11,7 @@ def search_youtube(query):
     :return tuple: (List of videos of format {'title': str, 'id': str}, List of playlists of format {'title': str, 'id': str})
     """
 
-    search_response = youtube_service.search().list(
+    search_response = m2s.youtube_service.search().list(
         q=query,
         part='id,snippet',
         maxResults=50,
@@ -44,7 +44,7 @@ def get_playlist_videos(playlist_id):
     :return tuple: (Playlist title, List of videos of format {'title': str, 'id': str})
     """
 
-    playlist_response = youtube_service.playlistItems().list(
+    playlist_response = m2s.youtube_service.playlistItems().list(
         playlistId=playlist_id,
         part='id,snippet,contentDetails',
         maxResults=50
@@ -58,7 +58,7 @@ def get_playlist_videos(playlist_id):
             'id': search_result['contentDetails']['videoId']
         })
 
-    playlist = youtube_service.playlists().list(
+    playlist = m2s.youtube_service.playlists().list(
         part='snippet',
         id=playlist_id
     ).execute()['items'][0]
