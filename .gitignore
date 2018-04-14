@@ -106,6 +106,7 @@ drive_credentials.json
 youtube_credentials.json
 *.mp4
 *.mp3
+*.webm
 .DS_Store
 settings.json
 test.py

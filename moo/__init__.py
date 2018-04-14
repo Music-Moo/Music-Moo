@@ -15,18 +15,6 @@ delete_queue = Queue(200)
 done_queue = Queue()
 
 
-from moo.worker import Worker, download_from_youtube, convert_to_mp3, upload_to_drive, delete_local_file
-
-threads = [
-    Worker(download_from_youtube, download_queue, convert_queue),
-    Worker(convert_to_mp3, convert_queue, upload_queue),
-    Worker(upload_to_drive, upload_queue, delete_queue),
-    Worker(delete_local_file, delete_queue, done_queue)
-]
-for thread in threads:
-    thread.start()
-
-
 from flask import Flask
 from moo.views.download import download
 from moo.views.gui import gui

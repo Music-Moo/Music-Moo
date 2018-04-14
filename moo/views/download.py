@@ -20,7 +20,6 @@ def add_to_download_queue():
 @download.route('/download/<playlist_id>')
 def add_playlist_to_download_queue(playlist_id):
     _, videos = get_playlist_videos(playlist_id)
-    print(videos)
     urls = get_urls_from_videos(videos)
     for url in urls:
         download_queue.put(url)
