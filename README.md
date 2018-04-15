@@ -1,4 +1,7 @@
-# Music Moo
+<p align="center">
+    <img src="https://i.imgur.com/bRX53zo.png" alt="logo" width="300px">
+</p>
+
 Gets rid of Spotify by downloading music from Youtube and putting it on Google Drive
 
 > Did you know? [Cows love music](https://www.youtube.com/watch?v=lXKDu6cdXLI)!
