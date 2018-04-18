@@ -5,20 +5,35 @@ from isodate import parse_duration
 from moo import m2s
 
 
-def search_youtube(query):
+def search_youtube(query, short=False):
     """
     Performs a search on Youtube for the top videos matching the query string.
 
     :param str query: Query string to search for
+    :param boolean short: If this is set to True, it will only search for videos <20 minutes long
     :return tuple: (List of videos of format {'title': str, 'duration': str, 'id': str}, List of playlists of format {'title': str, 'id': str})
     """
     
+    items = []
+
+    if short:
+        kwargs = {'type': 'video', 'maxResults': 30, 'videoDuration': 'short'}
+        search_response = m2s.youtube_service.search().list(
+            q=query,
+            part='id,snippet',
+            **kwargs
+        ).execute()
+        items += search_response.get('items', [])
+        kwargs = {'type': 'video', 'maxResults': 20, 'videoDuration': 'medium'}
+    else:
+        kwargs = {'type': 'video,playlist', 'maxResults': 50}
+
     search_response = m2s.youtube_service.search().list(
         q=query,
         part='id,snippet',
-        maxResults=50,
-        type='video,playlist'
+        **kwargs
     ).execute()
+    items += search_response.get('items', [])
 
     video_ids = []
     videos = []
