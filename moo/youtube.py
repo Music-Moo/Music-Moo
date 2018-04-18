@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from time import time
+from isodate import parse_duration
 
 from moo import m2s
 
@@ -8,9 +10,9 @@ def search_youtube(query):
     Performs a search on Youtube for the top videos matching the query string.
 
     :param str query: Query string to search for
-    :return tuple: (List of videos of format {'title': str, 'id': str}, List of playlists of format {'title': str, 'id': str})
+    :return tuple: (List of videos of format {'title': str, 'duration': str, 'id': str}, List of playlists of format {'title': str, 'id': str})
     """
-
+    
     search_response = m2s.youtube_service.search().list(
         q=query,
         part='id,snippet',
@@ -18,20 +20,31 @@ def search_youtube(query):
         type='video,playlist'
     ).execute()
 
+    video_ids = []
     videos = []
     playlists = []
-
+    
     for search_result in search_response.get('items', []):
-        if search_result['id']['kind'] == "youtube#video":
-            videos.append({
-                'title': search_result['snippet']['title'],
-                'id': search_result['id']['videoId']
-            })
-        elif search_result["id"]["kind"] == "youtube#playlist":
-            playlists.append({
-                'title': search_result['snippet']['title'],
-                'id': search_result['id']['playlistId']
-            })
+        if search_result['snippet']['liveBroadcastContent'] == 'none':
+            if search_result['id']['kind'] == "youtube#video":
+                video_ids.append(search_result['id']['videoId'])
+            elif search_result["id"]["kind"] == "youtube#playlist":
+                playlists.append({
+                    'title': search_result['snippet']['title'],
+                    'id': search_result['id']['playlistId']
+                })
+    
+    video_response = m2s.youtube_service.videos().list(
+        id=','.join(video_ids),
+        part='id,snippet,contentDetails'
+    ).execute()
+    
+    for video in video_response.get('items', []):
+        videos.append({
+                    'title': video['snippet']['title'],
+                    'duration': str(parse_duration(video['contentDetails']['duration'])),
+                    'id': video['id']
+                })
 
     return videos, playlists
 
@@ -41,7 +54,7 @@ def get_playlist_videos(playlist_id):
     Returns a list of videos inside the playlist with the given playlist_id.
 
     :param str playlist_id: ID of the playlist
-    :return tuple: (Playlist title, List of videos of format {'title': str, 'id': str})
+    :return tuple: (Playlist title, List of videos of format {'title': str, 'duration': str, 'id': str})
     """
 
     playlist_response = m2s.youtube_service.playlistItems().list(
@@ -50,13 +63,23 @@ def get_playlist_videos(playlist_id):
         maxResults=50
     ).execute()
 
+    video_ids = []
     videos = []
 
     for search_result in playlist_response.get('items', []):
+        video_ids.append(search_result['contentDetails']['videoId'])
+
+    video_response = m2s.youtube_service.videos().list(
+        id=','.join(video_ids),
+        part='id,snippet,contentDetails'
+    ).execute()
+
+    for video in video_response.get('items', []):
         videos.append({
-            'title': search_result['snippet']['title'],
-            'id': search_result['contentDetails']['videoId']
-        })
+                    'title': video['snippet']['title'],
+                    'duration': str(parse_duration(video['contentDetails']['duration'])),
+                    'id': video['id']
+                })
 
     playlist = m2s.youtube_service.playlists().list(
         part='snippet',
